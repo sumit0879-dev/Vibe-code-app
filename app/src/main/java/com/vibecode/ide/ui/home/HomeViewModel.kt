@@ -43,8 +43,10 @@ class HomeViewModel @Inject constructor(
             try {
                 val safeName = name.trim().ifBlank { "UntitledProject" }
                 val path = File(defaultRoot, safeName).absolutePath
+                // A new project starts as a completely empty folder — no scaffold or
+                // template files are generated. The user (or the AI agent) decides
+                // what goes in it.
                 val project = projectRepository.openOrCreateProject(safeName, path)
-                scaffoldAndroidProject(File(project.rootPath), safeName)
                 _uiState.value = _uiState.value.copy(isCreatingProject = false)
                 onCreated(project.id)
             } catch (e: Exception) {
@@ -73,68 +75,5 @@ class HomeViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
-    }
-
-    /** Lays out a minimal but real Android project skeleton so the AI has something to work with immediately. */
-    private fun scaffoldAndroidProject(root: File, name: String) {
-        if (File(root, "settings.gradle.kts").exists()) return // already scaffolded
-        val pkg = "com.example." + name.lowercase().filter { it.isLetterOrDigit() }.ifBlank { "app" }
-        val pkgPath = pkg.replace('.', '/')
-
-        File(root, "app/src/main/java/$pkgPath").mkdirs()
-        File(root, "app/src/main/res/values").mkdirs()
-
-        File(root, "settings.gradle.kts").writeText(
-            "rootProject.name = \"$name\"\ninclude(\":app\")\n"
-        )
-        File(root, "app/build.gradle.kts").writeText(
-            """
-            plugins {
-                id("com.android.application")
-                id("org.jetbrains.kotlin.android")
-            }
-            android {
-                namespace = "$pkg"
-                compileSdk = 34
-                defaultConfig {
-                    applicationId = "$pkg"
-                    minSdk = 24
-                    targetSdk = 34
-                    versionCode = 1
-                    versionName = "1.0"
-                }
-            }
-            """.trimIndent()
-        )
-        File(root, "app/src/main/AndroidManifest.xml").writeText(
-            """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-                <application android:label="$name">
-                    <activity android:name=".MainActivity" android:exported="true">
-                        <intent-filter>
-                            <action android:name="android.intent.action.MAIN" />
-                            <category android:name="android.intent.category.LAUNCHER" />
-                        </intent-filter>
-                    </activity>
-                </application>
-            </manifest>
-            """.trimIndent()
-        )
-        File(root, "app/src/main/java/$pkgPath/MainActivity.kt").writeText(
-            """
-            package $pkg
-
-            import android.app.Activity
-            import android.os.Bundle
-
-            class MainActivity : Activity() {
-                override fun onCreate(savedInstanceState: Bundle?) {
-                    super.onCreate(savedInstanceState)
-                }
-            }
-            """.trimIndent()
-        )
-        File(root, "README.md").writeText("# $name\n\nCreated with VibeCode AI IDE.\n")
     }
 }
