@@ -1,0 +1,3 @@
+# Rename this file to local.properties and set your Android SDK path.
+# In Termux with a proot/Android SDK setup, this is typically something like:
+sdk.dir=/data/data/com.termux/files/home/android-sdk
