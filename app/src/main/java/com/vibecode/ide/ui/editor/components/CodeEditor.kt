@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -65,7 +66,8 @@ fun CodeEditor(
         }
         Box(
             Modifier
-                .fillMaxSize()
+                .weight(1f)
+                .fillMaxHeight()
                 .let { if (!wordWrap) it.horizontalScroll(horizontalScroll) else it }
                 .padding(horizontal = 8.dp, vertical = 8.dp),
         ) {
@@ -91,7 +93,7 @@ private fun LineNumberGutter(lineCount: Int, fontSizeSp: Int, palette: SyntaxPal
     Box(
         Modifier
             .widthIn(min = 40.dp)
-            .fillMaxSize()
+            .fillMaxHeight()
             .background(palette.background)
             .padding(horizontal = 8.dp, vertical = 8.dp),
     ) {
